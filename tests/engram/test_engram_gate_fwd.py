@@ -12,10 +12,6 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# engram_gate_fwd shows borderline numerical differences on HIP/AMD due to
-# floating-point accumulation order differences (diff marginally exceeds 2e-10 threshold)
-pytestmark = pytest.mark.skipif(IS_HIP, reason='engram_gate_fwd has borderline numerical differences on HIP/AMD (float accumulation order)')
-
 
 def generate_test_data(params):
     num_tokens = params['num_tokens']
@@ -53,9 +49,16 @@ def test_engram_gate_fwd(params):
     out_save, dot, gate_score, rstd_x, rstd_k = engram_gate_fwd(
         x_data, k_data, v_data, weight_fused, eps, clamp_value, save_for_backward=True,
     )
+    # HIP (hipcc/clang) may use different FMA contraction patterns than CUDA
+    # (nvcc/ptx) for the bfloat16 output computation (x + gate_score * v),
+    # producing 1-2 ULP differences that marginally exceed the CUDA threshold.
+    # Relax the output threshold slightly for HIP while keeping all other
+    # checks at the original 2e-10.
+    out_threshold = 5e-10 if IS_HIP else 2e-10
+
     assert dot is not None and gate_score is not None and rstd_x is not None and rstd_k is not None
     diff_out = calc_diff(out_save, out_ref)
-    assert diff_out < 2e-10, f'out_save mismatch: {diff_out:.6e}'
+    assert diff_out < out_threshold, f'out_save mismatch: {diff_out:.6e}'
     diff_dot = calc_diff(dot, dot_ref)
     assert diff_dot < 2e-10, f'dot mismatch: {diff_dot:.6e}'
     diff_gate = calc_diff(gate_score, gate_score_ref)
@@ -71,7 +74,7 @@ def test_engram_gate_fwd(params):
     )
     assert dot_n is None and gate_score_n is None and rstd_x_n is None and rstd_k_n is None
     diff_out = calc_diff(out_no_save, out_ref)
-    assert diff_out < 2e-10, f'out_no_save mismatch: {diff_out:.6e}'
+    assert diff_out < out_threshold, f'out_no_save mismatch: {diff_out:.6e}'
     assert_equal(out_no_save, out_save)
 
 

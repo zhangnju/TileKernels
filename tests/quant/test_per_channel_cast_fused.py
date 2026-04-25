@@ -13,8 +13,9 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# per_channel_cast_fused depends on get_fused_mapping which uses T.sync_warp() not supported on HIP/AMD targets
-pytestmark = pytest.mark.skipif(IS_HIP, reason='per_channel_cast_fused depends on get_fused_mapping (T.sync_warp()) not supported on HIP/AMD')
+# per_channel_cast_fused depends on get_fused_mapping which uses __match_any_sync (no AMD equivalent)
+pytestmark = pytest.mark.skipif(IS_HIP, reason='per_channel_cast_fused depends on get_fused_mapping which uses __match_any_sync (no HIP/AMD equivalent)')
+
 
 
 def generate_test_data(params):

@@ -11,8 +11,9 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# swiglu_backward_and_per_token_cast depends on get_fused_mapping which uses T.sync_warp() not supported on HIP/AMD targets
-pytestmark = pytest.mark.skipif(IS_HIP, reason='swiglu_backward depends on get_fused_mapping (T.sync_warp()) not supported on HIP/AMD')
+# swiglu_backward depends on get_fused_mapping which uses __match_any_sync (no AMD equivalent)
+pytestmark = pytest.mark.skipif(IS_HIP, reason='swiglu_backward depends on get_fused_mapping which uses __match_any_sync (no HIP/AMD equivalent)')
+
 
 
 def generate_test_data(params):

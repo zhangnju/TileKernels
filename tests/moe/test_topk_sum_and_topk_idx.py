@@ -14,8 +14,9 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# topk_sum_and_topk_group_idx_kernel uses T.sync_warp() which is not supported on HIP/AMD targets
-pytestmark = pytest.mark.skipif(IS_HIP, reason='topk_sum_and_topk_group_idx_kernel uses T.sync_warp() not supported on HIP/AMD')
+# HIP fix: T.alloc_var(init=0) now generates count_var[0] = 0 initialization.
+# Previously the block_attr path skipped init code on HIP, causing count_var
+# to hold garbage and writes to wrong indices in topk_group_idx_shared.
 
 
 def torch_stable_topk(scores: torch.Tensor, num_topk: int):

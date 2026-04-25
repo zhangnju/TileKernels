@@ -14,8 +14,9 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# get_fused_mapping_kernel uses T.sync_warp() which is not supported on HIP/AMD targets
-pytestmark = pytest.mark.skipif(IS_HIP, reason='get_fused_mapping_kernel uses T.sync_warp() not supported on HIP/AMD')
+# get_fused_mapping_kernel uses T.call_extern('__match_any_sync') which has no AMD equivalent
+pytestmark = pytest.mark.skipif(IS_HIP, reason='get_fused_mapping_kernel uses __match_any_sync which has no HIP/AMD equivalent')
+
 
 
 def generate_test_data(params):

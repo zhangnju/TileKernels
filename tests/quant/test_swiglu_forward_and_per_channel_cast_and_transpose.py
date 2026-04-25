@@ -11,9 +11,8 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# swiglu_forward_and_per_channel_cast_and_transpose_kernel fails HIP compilation:
-# TileLang generates invalid HIP code (uint1 2-arg constructor not supported in ROCm)
-pytestmark = pytest.mark.skipif(IS_HIP, reason='swiglu_forward_and_per_channel_cast_and_transpose_kernel fails HIP compilation (invalid uint1 constructor in generated code)')
+# HIP compilation fix: tilelang codegen_hip.cc now handles ShuffleNode for
+# bfloat16x2/float16x2 using __pack_bfloat162/__pack_half2 with ROCm's uint1.
 
 
 def generate_test_data(params):

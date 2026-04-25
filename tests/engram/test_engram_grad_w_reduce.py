@@ -12,9 +12,8 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# engram_grad_w_reduce_kernel fails with hipModuleLaunchKernel invalid argument for
-# larger hidden sizes on HIP/AMD targets (T.Pipelined with num_stages > 1 incompatibility)
-pytestmark = pytest.mark.skipif(IS_HIP, reason='engram_grad_w_reduce_kernel fails on HIP/AMD targets (invalid argument launch config)')
+# HIP fix: tilelang pipeline_planning.cc now forces num_stages=1 on ROCM targets,
+# preventing double-buffered shared memory from exceeding AMD LDS limits.
 
 
 def grad_w_reduce_ref(grad_w_partial, weight_hidden, weight_embed, grad_weight_hidden, grad_weight_embed):

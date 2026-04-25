@@ -17,8 +17,8 @@ from tests.conftest import IS_HIP
 # Disable TileLang prints
 os.environ['TILELANG_PRINT_ON_COMPILATION'] = '0'
 
-# top2_sum_gate_kernel and topk_sum_and_topk_group_idx_kernel use T.sync_warp() which is not supported on HIP/AMD targets
-pytestmark = pytest.mark.skipif(IS_HIP, reason='top2_sum_gate_kernel uses T.sync_warp() not supported on HIP/AMD')
+# HIP fixes: T.sync_warp() now supported (compiler memory fence).
+#            T.alloc_var(init=0) now generates initialization code.
 
 
 _CONFIGS = [
